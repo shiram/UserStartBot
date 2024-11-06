@@ -1,0 +1,75 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<style>
+    #serviceButton {
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+        cursor: pointer;
+    }
+    .running {
+        background-color: green;
+        color: white;
+    }
+
+    .stopped {
+        background-color: gray;
+        color: black;
+    }
+</style>
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+    <h3>User Controlled Background Task Sample</h3>
+    <form method="post">
+        <button type="submit" asp-page-handler="StartTask">Start Background Task</button>
+        <button type="submit" asp-page-handler="StopTask">Stop Background Task</button>
+    </form>
+
+    <hr/>
+
+    <button id="serviceButton" class="stopped">Service is Off</button>
+</div>
+
+<script>
+    async function CheckServiceState()
+    {
+        try {
+            const response = await fetch('/Index?handler=ServiceState', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+            console.log("Is Running: ", data);
+            const button = document.getElementById('serviceButton');
+            if(data.isRunning)
+            {
+                button.classList.remove('stopped');
+                button.classList.add('running');
+                button.innerText = 'Service is On';
+            }
+            else
+            {
+                button.classList.remove('running');
+                button.classList.add('stopped');
+                button.innerText = 'Service is Off';
+            }
+        }
+        catch(errors)
+        {
+            console.error(errors);
+        }
+    }
+
+    setInterval(CheckServiceState, 3000);
+    CheckServiceState();
+</script>
